@@ -88,3 +88,34 @@ ul li {
     width: 100%;
     text-align: center;
 }
+@media screen and (max-width: 480px) {
+    .navbar {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .container {
+        padding: 10px;
+        margin: 20px auto;
+    }
+
+    .input-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    input {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .footer {
+        font-size: 12px;
+        padding: 6px;
+    }
+}
