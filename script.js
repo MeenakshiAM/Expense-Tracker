@@ -39,6 +39,10 @@ function updateUI() {
 }
 
 function removeExpense(index) {
+    // ✅ FIX: Ask for confirmation before deleting
+    const confirmed = confirm(`Are you sure you want to delete "${expenses[index].name}"?`);
+    if (!confirmed) return;
+
     total -= expenses[index].amount;
     expenses.splice(index, 1);
     updateUI();
