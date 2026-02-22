@@ -1,6 +1,23 @@
 let expenses = [];
 let total = 0;
+let budget = 0; // User sets this via input
 
+// --- Set Budget dynamically ---
+function setBudget() {
+    const budgetInput = document.getElementById("budget-amount");
+    const newBudget = parseFloat(budgetInput.value);
+
+    if (isNaN(newBudget) || newBudget <= 0) {
+        alert("Please enter a valid positive budget amount.");
+        return;
+    }
+
+    budget = newBudget;
+    alert(`Budget set to ₹${budget}`);
+    budgetInput.value = "";
+}
+
+// --- Add Expense ---
 function addExpense() {
     const nameInput = document.getElementById("expense-name");
     const amountInput = document.getElementById("expense-amount");
@@ -20,8 +37,14 @@ function addExpense() {
     
     nameInput.value = "";
     amountInput.value = "";
+
+    // ✅ Check budget if user has set one
+    if (budget > 0) {
+        checkBudget();
+    }
 }
 
+// --- Update UI ---
 function updateUI() {
     const expenseList = document.getElementById("expense-list");
     const totalAmount = document.getElementById("total-amount");
@@ -38,6 +61,7 @@ function updateUI() {
     totalAmount.textContent = total.toFixed(2);
 }
 
+// --- Remove Expense ---
 function removeExpense(index) {
     const confirmed = confirm(`Are you sure you want to delete "${expenses[index].name}"?`);
     if (!confirmed) return;
@@ -45,6 +69,13 @@ function removeExpense(index) {
     total -= expenses[index].amount;
     expenses.splice(index, 1);
     updateUI();
+}
+
+// --- Check Budget ---
+function checkBudget() {
+    if (total > budget) {
+        alert(`⚠ Warning! Your expenses have exceeded your budget of ₹${budget}.`);
+    }
 }
 
 // --- Dark Mode Toggle ---
