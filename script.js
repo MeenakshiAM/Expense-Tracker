@@ -8,8 +8,9 @@ function addExpense() {
     const name = nameInput.value.trim();
     const amount = parseFloat(amountInput.value);
 
+    // ✅ Only allow positive values
     if (name === "" || isNaN(amount) || amount <= 0) {
-        alert("Please enter a valid expense name and amount.");
+        alert("Please enter a valid expense name and a positive amount greater than 0.");
         return;
     }
 
@@ -39,7 +40,7 @@ function updateUI() {
 }
 
 function removeExpense(index) {
-    // ✅ FIX: Ask for confirmation before deleting
+    // ✅ Ask for confirmation before deleting
     const confirmed = confirm(`Are you sure you want to delete "${expenses[index].name}"?`);
     if (!confirmed) return;
 
