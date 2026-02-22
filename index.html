@@ -9,10 +9,16 @@
 <body>
     <header class="navbar">
         <h1>Expense Tracker</h1>
+        <!-- Dark Mode Toggle Button -->
+        <button id="theme-toggle">🌙 Dark Mode</button>
     </header>
 
     <div class="container">
         <h2>Calculate your Expense</h2>
+        <div class="budget-group">
+    <input type="number" id="budget-amount" placeholder="Set Monthly Budget">
+    <button onclick="setBudget()">Set Budget</button>
+</div>
         <div class="input-group">
             <input type="text" id="expense-name" placeholder="Expense Name">
             <input type="number" id="expense-amount" placeholder="Amount">
@@ -22,11 +28,10 @@
         <h3>Total: ₹<span id="total-amount">0</span></h3>
     </div>
 
-
     <footer class="footer">
         <p>© 2025 Expense Tracker | Built with ❤️</p>
     </footer>
+    
     <script src="script.js"></script>
 </body>
 </html>
-
