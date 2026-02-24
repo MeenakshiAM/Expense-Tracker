@@ -53,6 +53,7 @@ function updateUI() {
 
     expenses.forEach((expense, index) => {
         const li = document.createElement("li");
+        li.classList.add("fade-in"); // 👈 animation added
         li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
                         <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
         expenseList.appendChild(li);
@@ -66,9 +67,17 @@ function removeExpense(index) {
     const confirmed = confirm(`Are you sure you want to delete "${expenses[index].name}"?`);
     if (!confirmed) return;
 
-    total -= expenses[index].amount;
-    expenses.splice(index, 1);
-    updateUI();
+    const expenseList = document.getElementById("expense-list");
+    const item = expenseList.children[index];
+
+    item.classList.add("fade-out"); // 👈 add fade-out animation
+
+    // Wait for animation before removing
+    setTimeout(() => {
+        total -= expenses[index].amount;
+        expenses.splice(index, 1);
+        updateUI();
+    }, 300); // matches animation duration
 }
 
 // --- Check Budget ---
