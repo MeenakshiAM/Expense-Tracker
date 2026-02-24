@@ -139,3 +139,13 @@ footer {
 .dark table th {
     background: #333;
 }
+.chart-container {
+    width: 400px;
+    height: 400px;
+    margin: 20px auto;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}

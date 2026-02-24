@@ -1,23 +1,20 @@
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 let monthlyBudget = localStorage.getItem("monthlyBudget") || 0;
 let editIndex = -1;
+let expenseChart;
 
 const toggle = document.getElementById("darkToggle");
 
-/* Dark Mode Load */
 if (localStorage.getItem("darkMode") === "enabled") {
     document.body.classList.add("dark");
     toggle.checked = true;
 }
 
 toggle.addEventListener("change", function () {
-    if (this.checked) {
-        document.body.classList.add("dark");
-        localStorage.setItem("darkMode", "enabled");
-    } else {
-        document.body.classList.remove("dark");
-        localStorage.setItem("darkMode", "disabled");
-    }
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode",
+        document.body.classList.contains("dark") ? "enabled" : "disabled"
+    );
 });
 
 function saveData() {
@@ -32,7 +29,7 @@ function addExpense() {
     const category = document.getElementById("category").value;
 
     if (!name || !amount || !date) {
-        alert("Please fill all fields");
+        alert("Fill all fields");
         return;
     }
 
@@ -43,34 +40,25 @@ function addExpense() {
         editIndex = -1;
     }
 
-    clearForm();
     saveData();
     renderExpenses();
 }
 
 function editExpense(index) {
     const exp = expenses[index];
-
     document.getElementById("name").value = exp.name;
     document.getElementById("amount").value = exp.amount;
     document.getElementById("date").value = exp.date;
     document.getElementById("category").value = exp.category;
-
     editIndex = index;
 }
 
 function deleteExpense(index) {
-    if (confirm("Are you sure you want to delete this expense?")) {
+    if (confirm("Delete this expense?")) {
         expenses.splice(index, 1);
         saveData();
         renderExpenses();
     }
-}
-
-function clearForm() {
-    document.getElementById("name").value = "";
-    document.getElementById("amount").value = "";
-    document.getElementById("date").value = "";
 }
 
 function setBudget() {
@@ -114,7 +102,6 @@ function renderExpenses() {
 
     filtered.forEach((exp, index) => {
         total += exp.amount;
-
         list.innerHTML += `
             <tr>
                 <td>${exp.name}</td>
@@ -140,6 +127,7 @@ function renderExpenses() {
 
     populateMonths();
     generateMonthlySummary();
+    generatePieChart(month);
 }
 
 function populateMonths() {
@@ -160,8 +148,7 @@ function generateMonthlySummary() {
 
     expenses.forEach(exp => {
         const month = exp.date.slice(0, 7);
-        if (!monthlyTotals[month]) monthlyTotals[month] = 0;
-        monthlyTotals[month] += exp.amount;
+        monthlyTotals[month] = (monthlyTotals[month] || 0) + exp.amount;
     });
 
     for (let month in monthlyTotals) {
@@ -172,6 +159,52 @@ function generateMonthlySummary() {
             </tr>
         `;
     }
+}
+
+function generatePieChart(selectedMonth) {
+    if (expenseChart) expenseChart.destroy();
+
+    let monthExpenses = selectedMonth && selectedMonth !== "All"
+        ? expenses.filter(e => e.date.startsWith(selectedMonth))
+        : expenses;
+
+    const categoryTotals = {};
+
+    monthExpenses.forEach(exp => {
+        categoryTotals[exp.category] =
+            (categoryTotals[exp.category] || 0) + exp.amount;
+    });
+
+    const labels = Object.keys(categoryTotals);
+    const data = Object.values(categoryTotals);
+
+    const ctx = document.getElementById("expenseChart").getContext("2d");
+
+    expenseChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    let total = data.reduce((a, b) => a + b, 0);
+                    let value = context.raw;
+                    let percentage = ((value / total) * 100).toFixed(1);
+                    return `${context.label}: ₹${value} (${percentage}%)`;
+                }
+            }
+        }
+    }
+}
+    });
 }
 
 renderExpenses();
