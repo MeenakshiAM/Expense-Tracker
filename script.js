@@ -1,94 +1,106 @@
+
 let expenses = [];
 let total = 0;
-let budget = 0; // User sets this via input
+let budget = 0;
 
-// --- Set Budget dynamically ---
+window.onload = function () {
+  const storedExpenses = localStorage.getItem("expenses");
+  if (storedExpenses) {
+    expenses = JSON.parse(storedExpenses);
+    total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    updateUI();
+  }
+};
+
 function setBudget() {
-    const budgetInput = document.getElementById("budget-amount");
-    const newBudget = parseFloat(budgetInput.value);
+  const budgetInput = document.getElementById("budget-amount");
+  const newBudget = parseFloat(budgetInput.value);
 
-    if (isNaN(newBudget) || newBudget <= 0) {
-        alert("Please enter a valid positive budget amount.");
-        return;
-    }
+  if (isNaN(newBudget) || newBudget <= 0) {
+    alert("Please enter a valid positive budget amount.");
+    return;
+  }
 
-    budget = newBudget;
-    alert(`Budget set to ₹${budget}`);
-    budgetInput.value = "";
+  budget = newBudget;
+  alert(`Budget set to ₹${budget}`);
+  budgetInput.value = "";
 }
 
-// --- Add Expense ---
 function addExpense() {
-    const nameInput = document.getElementById("expense-name");
-    const amountInput = document.getElementById("expense-amount");
-    
-    const name = nameInput.value.trim();
-    const amount = parseFloat(amountInput.value);
+  const nameInput = document.getElementById("expense-name");
+  const amountInput = document.getElementById("expense-amount");
 
-    if (name === "" || isNaN(amount) || amount <= 0) {
-        alert("Please enter a valid expense name and a positive amount greater than 0.");
-        return;
-    }
+  const name = nameInput.value.trim();
+  const amount = parseFloat(amountInput.value);
 
-    expenses.push({ name, amount });
-    total += amount;
+  if (name === "" || isNaN(amount) || amount <= 0) {
+    alert(
+      "Please enter a valid expense name and a positive amount greater than 0."
+    );
+    return;
+  }
 
-    updateUI();
-    
-    nameInput.value = "";
-    amountInput.value = "";
+  expenses.push({ name, amount });
+  total += amount;
 
-    // ✅ Check budget if user has set one
-    if (budget > 0) {
-        checkBudget();
-    }
+  updateUI();
+  saveExpenses();
+
+  nameInput.value = "";
+  amountInput.value = "";
+
+  if (budget > 0) {
+    checkBudget();
+  }
 }
 
-// --- Update UI ---
 function updateUI() {
-    const expenseList = document.getElementById("expense-list");
-    const totalAmount = document.getElementById("total-amount");
-    
-    expenseList.innerHTML = "";
+  const expenseList = document.getElementById("expense-list");
+  const totalAmount = document.getElementById("total-amount");
 
-    expenses.forEach((expense, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
+  expenseList.innerHTML = "";
+
+  expenses.forEach((expense, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
                         <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
-        expenseList.appendChild(li);
-    });
+    expenseList.appendChild(li);
+  });
 
-    totalAmount.textContent = total.toFixed(2);
+  totalAmount.textContent = total.toFixed(2);
 }
 
-// --- Remove Expense ---
 function removeExpense(index) {
-    const confirmed = confirm(`Are you sure you want to delete "${expenses[index].name}"?`);
-    if (!confirmed) return;
+  const confirmed = confirm(
+    `Are you sure you want to delete \"${expenses[index].name}\"?`
+  );
+  if (!confirmed) return;
 
-    total -= expenses[index].amount;
-    expenses.splice(index, 1);
-    updateUI();
+  total -= expenses[index].amount;
+  expenses.splice(index, 1);
+  updateUI();
+  saveExpenses();
 }
 
-// --- Check Budget ---
+function saveExpenses() {
+  localStorage.setItem("expenses", JSON.stringify(expenses));
+}
+
 function checkBudget() {
-    if (total > budget) {
-        alert(`⚠ Warning! Your expenses have exceeded your budget of ₹${budget}.`);
-    }
+  if (total > budget) {
+    alert(`⚠ Warning! Your expenses have exceeded your budget of ₹${budget}.`);
+  }
 }
 
-// --- Dark Mode Toggle ---
 const themeToggleBtn = document.getElementById("theme-toggle");
 themeToggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    if (document.body.classList.contains("dark-mode")) {
-        themeToggleBtn.textContent = "☀ Light Mode";
-    } else {
-        themeToggleBtn.textContent = "🌙 Dark Mode";
-    }
+  document.body.classList.toggle("dark-mode");
+  if (document.body.classList.contains("dark-mode")) {
+    themeToggleBtn.textContent = "☀ Light Mode";
+  } else {
+    themeToggleBtn.textContent = "🌙 Dark Mode";
+  }
 });
-// ===== Smart Expense Assistant =====
 
 function toggleChat() {
   const chat = document.getElementById("chatContainer");
@@ -121,11 +133,8 @@ function appendMessage(sender, message) {
 function getBotResponse(input) {
   input = input.toLowerCase();
 
-  let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-  let total = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-
   if (input.includes("total") || input.includes("spend")) {
-    return `Your total recorded expense is ₹${total}.`;
+    return `Your total recorded expense is ₹${total.toFixed(2)}.`;
   }
 
   if (input.includes("save") || input.includes("saving")) {
