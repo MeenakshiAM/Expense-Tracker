@@ -1,3 +1,4 @@
+
 let expenses = [];
 let total = 0;
 let budget = 0;
@@ -29,36 +30,31 @@ function setBudget() {
 function addExpense() {
   const nameInput = document.getElementById("expense-name");
   const amountInput = document.getElementById("expense-amount");
-  const dateInput = document.getElementById("expense-date");
-  const categoryInput = document.getElementById("expense-category");
 
   const name = nameInput.value.trim();
   const amount = parseFloat(amountInput.value);
-  const date = dateInput.value;
-  const category = categoryInput.value;
 
-  if (name === "" || isNaN(amount) || amount <= 0 || date === "" || category === "") {
-    alert("Please fill in all fields.");
+  if (name === "" || isNaN(amount) || amount <= 0) {
+    alert(
+      "Please enter a valid expense name and a positive amount greater than 0."
+    );
     return;
   }
 
-  expenses.push({ name, amount, date, category });
+  expenses.push({ name, amount });
   total += amount;
 
-  applyFilters();
+  updateUI();
   saveExpenses();
 
   nameInput.value = "";
   amountInput.value = "";
-  document.getElementById('expense-date').valueAsDate = new Date();
-  categoryInput.value = "";
 
   if (budget > 0) {
     checkBudget();
   }
 }
 
-// --- Update UI ---
 function updateUI() {
     const expenseList = document.getElementById("expense-list");
     const totalAmount = document.getElementById("total-amount");
@@ -70,8 +66,8 @@ function updateUI() {
         li.classList.add("fade-in"); // 👈 animation added
         li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
                         <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
-        expenseList.appendChild(li);
-    });
+    expenseList.appendChild(li);
+  });
 
   expenseList.innerHTML = "";
 
