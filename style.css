@@ -64,6 +64,7 @@ ul li {
     padding: 8px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-radius: 5px;
 }
 
@@ -77,6 +78,30 @@ ul li {
 
 .delete-btn:hover {
     background-color: darkred;
+}
+
+.edit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.save-btn, .cancel-btn {
+    display: none;
+}
+
+.editing .edit-btn, .editing .delete-btn {
+    display: none;
+}
+
+.editing .save-btn, .editing .cancel-btn {
+    display: inline-block;
 }
 
 /* Footer */
@@ -133,6 +158,14 @@ body.dark-mode .delete-btn {
 
 body.dark-mode .delete-btn:hover {
     background-color: #b71c1c;
+}
+
+body.dark-mode .edit-btn {
+    background-color: #0056b3;
+}
+
+body.dark-mode .edit-btn:hover {
+    background-color: #003d80;
 }
 
 /* Responsive */
