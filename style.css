@@ -120,6 +120,30 @@ ul li div {
     flex: 1;
 }
 
+.edit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.save-btn, .cancel-btn {
+    display: none;
+}
+
+.editing .edit-btn, .editing .delete-btn {
+    display: none;
+}
+
+.editing .save-btn, .editing .cancel-btn {
+    display: inline-block;
+}
+
 /* Footer */
 .footer {
     background: #277127;
@@ -167,6 +191,14 @@ body.dark-mode ul li {
     background-color: #333;
     color: #f1f1f1;
     border-color: #444;
+}
+
+body.dark-mode .edit-btn {
+    background-color: #0056b3;
+}
+
+body.dark-mode .edit-btn:hover {
+    background-color: #003d80;
 }
 
 /* Responsive */
