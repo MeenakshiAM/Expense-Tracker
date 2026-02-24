@@ -22,31 +22,41 @@ body {
 
 .container {
     background: white;
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
-.input-group {
+.budget-group, .input-group, .filter-sort-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
 }
 
-input {
-    flex: 1;
-    padding: 8px;
+input, select, button {
+    padding: 10px;
     font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
+
+#expense-name { flex: 2.5; }
+#expense-amount { flex: 1.5; }
+#expense-date { flex: 1.5; }
+#expense-category { flex: 1.5; }
+
+#search-bar { flex: 2.5; }
+#filter-category { flex: 2; }
+#sort-by { flex: 2; }
 
 button {
-    padding: 8px 15px;
     background-color: #28a745;
     color: white;
-    border: none;
     cursor: pointer;
+    border: none;
 }
 
 button:hover {
@@ -56,28 +66,58 @@ button:hover {
 ul {
     list-style: none;
     padding: 0;
+    margin-top: 20px;
 }
 
 ul li {
-    background: #ddd;
-    margin: 5px 0;
-    padding: 8px;
+    background: #f9f9f9;
+    margin: 8px 0;
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-radius: 5px;
+    border: 1px solid #eee;
 }
 
-.delete-btn {
-    background-color: red;
-    color: white;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
+ul li span {
+    flex-grow: 1;
+    text-align: left;
 }
 
-.delete-btn:hover {
-    background-color: darkred;
+ul li div {
+    display: flex;
+    gap: 8px;
+}
+
+.delete-btn, .edit-btn, .save-btn, .cancel-btn {
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+.delete-btn { background-color: #dc3545; }
+.delete-btn:hover { background-color: #c82333; }
+.edit-btn { background-color: #007bff; }
+.edit-btn:hover { background-color: #0056b3; }
+
+.save-btn, .cancel-btn {
+    display: none;
+}
+
+.editing .edit-btn, .editing .delete-btn {
+    display: none;
+}
+
+.editing .save-btn, .editing .cancel-btn {
+    display: inline-block;
+}
+
+.editing {
+    gap: 10px;
+}
+
+.editing input, .editing select {
+    flex: 1;
 }
 
 .edit-btn {
@@ -132,7 +172,7 @@ body.dark-mode .footer {
     color: white;
 }
 
-body.dark-mode input {
+body.dark-mode input, body.dark-mode select {
     background-color: #333;
     color: #f1f1f1;
     border: 1px solid #555;
@@ -150,14 +190,7 @@ body.dark-mode button:hover {
 body.dark-mode ul li {
     background-color: #333;
     color: #f1f1f1;
-}
-
-body.dark-mode .delete-btn {
-    background-color: #c62828;
-}
-
-body.dark-mode .delete-btn:hover {
-    background-color: #b71c1c;
+    border-color: #444;
 }
 
 body.dark-mode .edit-btn {
@@ -169,38 +202,12 @@ body.dark-mode .edit-btn:hover {
 }
 
 /* Responsive */
-@media screen and (max-width: 480px) {
-    .navbar {
-        font-size: 16px;
-        padding: 8px;
-    }
-
-    .container {
-        padding: 10px;
-        margin: 20px auto;
-    }
-
-    .input-group {
+@media screen and (max-width: 768px) {
+    .input-group, .filter-sort-group, .budget-group {
         flex-direction: column;
-        gap: 5px;
-    }
-
-    input {
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    button {
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    .footer {
-        font-size: 12px;
-        padding: 6px;
+        gap: 10px;
     }
 }
-/* ===== Smart Expense Assistant ===== */
 
 .chat-toggle {
   position: fixed;

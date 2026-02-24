@@ -1,3 +1,4 @@
+
 let expenses = [];
 let total = 0;
 let budget = 0;
@@ -7,8 +8,9 @@ window.onload = function () {
   if (storedExpenses) {
     expenses = JSON.parse(storedExpenses);
     total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    updateUI();
   }
+  document.getElementById('expense-date').valueAsDate = new Date(); // Set default date
+  applyFilters(); // Apply default filters on load
 };
 
 function setBudget() {
@@ -54,18 +56,31 @@ function addExpense() {
 }
 
 function updateUI() {
-  const expenseList = document.getElementById("expense-list");
-  const totalAmount = document.getElementById("total-amount");
+    const expenseList = document.getElementById("expense-list");
+    const totalAmount = document.getElementById("total-amount");
+    
+    expenseList.innerHTML = "";
+
+    expenses.forEach((expense, index) => {
+        const li = document.createElement("li");
+        li.classList.add("fade-in"); // 👈 animation added
+        li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
+                        <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
+    expenseList.appendChild(li);
+  });
 
   expenseList.innerHTML = "";
 
-  expenses.forEach((expense, index) => {
+  const displayExpenses = filteredExpenses || expenses;
+
+  displayExpenses.forEach((expense) => {
     const li = document.createElement("li");
+    const originalIndex = expenses.indexOf(expense);
     li.innerHTML = `
-            <span>${expense.name}: ₹${expense.amount.toFixed(2)}</span>
+            <span>${expense.name} - ${expense.category} - ${expense.date} - ₹${expense.amount.toFixed(2)}</span>
             <div>
-                <button class="edit-btn" onclick="editExpense(${index})">✏️</button>
-                <button class="delete-btn" onclick="removeExpense(${index})">X</button>
+                <button class="edit-btn" onclick="editExpense(${originalIndex})">✏️</button>
+                <button class="delete-btn" onclick="removeExpense(${originalIndex})">X</button>
             </div>
         `;
     expenseList.appendChild(li);
@@ -82,55 +97,82 @@ function removeExpense(index) {
 
   total -= expenses[index].amount;
   expenses.splice(index, 1);
-  updateUI();
+  applyFilters();
   saveExpenses();
 }
 
 function editExpense(index) {
     const expenseList = document.getElementById('expense-list');
-    const li = expenseList.children[index];
-    const expense = expenses[index];
+    const li = Array.from(expenseList.children).find(child => child.querySelector(`.edit-btn[onclick="editExpense(${index})"]`));
+    if(!li) return;
 
-    // Switch to editing UI
-    li.classList.add('editing');
-    const template = document.getElementById('edit-template');
-    li.innerHTML = template.content.firstElementChild.innerHTML;
+    const expenseList = document.getElementById("expense-list");
+    const item = expenseList.children[index];
 
-    // Populate fields and set listeners
-    const nameInput = li.querySelector('.edit-name');
-    const amountInput = li.querySelector('.edit-amount');
-    nameInput.value = expense.name;
-    amountInput.value = expense.amount;
+    item.classList.add("fade-out"); // 👈 add fade-out animation
 
-    li.querySelector('.save-btn').onclick = () => saveExpense(index);
-    li.querySelector('.cancel-btn').onclick = () => updateUI();
+    // Wait for animation before removing
+    setTimeout(() => {
+        total -= expenses[index].amount;
+        expenses.splice(index, 1);
+        updateUI();
+    }, 300); // matches animation duration
 }
-
 
 function saveExpense(index) {
   const expenseList = document.getElementById("expense-list");
   const li = expenseList.children[index];
   const nameInput = li.querySelector(".edit-name");
   const amountInput = li.querySelector(".edit-amount");
+  const dateInput = li.querySelector(".edit-date");
+  const categoryInput = li.querySelector(".edit-category");
 
   const newName = nameInput.value.trim();
   const newAmount = parseFloat(amountInput.value);
+  const newDate = dateInput.value;
+  const newCategory = categoryInput.value;
 
-  if (newName === "" || isNaN(newAmount) || newAmount <= 0) {
-    alert("Please enter a valid name and positive amount.");
+  if (newName === "" || isNaN(newAmount) || newAmount <= 0 || newDate === "" || newCategory === "") {
+    alert("Please fill in all fields.");
     return;
   }
 
   total = total - expenses[index].amount + newAmount;
-  expenses[index] = { name: newName, amount: newAmount };
+  expenses[index] = { name: newName, amount: newAmount, date: newDate, category: newCategory };
 
-  updateUI();
+  applyFilters();
   saveExpenses();
 }
 
-function cancelEdit() {
-  updateUI();
+function applyFilters() {
+    const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+    const filterCategory = document.getElementById('filter-category').value;
+    const sortBy = document.getElementById('sort-by').value;
+
+    let filteredExpenses = expenses.filter(expense => {
+        const nameMatch = expense.name.toLowerCase().includes(searchTerm);
+        const categoryMatch = filterCategory === 'all' || expense.category === filterCategory;
+        return nameMatch && categoryMatch;
+    });
+
+    switch (sortBy) {
+        case 'date-desc':
+            filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            break;
+        case 'date-asc':
+            filteredExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+            break;
+        case 'amount-desc':
+            filteredExpenses.sort((a, b) => b.amount - a.amount);
+            break;
+        case 'amount-asc':
+            filteredExpenses.sort((a, b) => a.amount - b.amount);
+            break;
+    }
+
+    updateUI(filteredExpenses);
 }
+
 
 function saveExpenses() {
   localStorage.setItem("expenses", JSON.stringify(expenses));
