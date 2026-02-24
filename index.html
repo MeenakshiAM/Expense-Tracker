@@ -2,99 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" sizes="64x64" href="/images/MoneyIcon.png">
 </head>
-
 <body>
-    <header class="navbar">
-        <h1>Expense Tracker</h1>
-        <!-- Dark Mode Toggle Button -->
-        <button id="theme-toggle">🌙 Dark Mode</button>
-    </header>
 
-    <div class="container">
-        <h2>Calculate your Expense</h2>
-        <div class="budget-group">
-    <input type="number" id="budget-amount" placeholder="Set Monthly Budget">
-    <button onclick="setBudget()">Set Budget</button>
-</div>
-        <div class="input-group">
-            <input type="text" id="expense-name" placeholder="Expense Name">
-            <input type="number" id="expense-amount" placeholder="Amount">
-            <input type="date" id="expense-date">
-            <select id="expense-category">
-                <option value="" disabled selected>Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
-            </select>
-            <button onclick="addExpense()">Add Expense</button>
-        </div>
+<header>
+    <h1>Expense Tracker</h1>
 
-        <div class="filter-sort-group">
-            <input type="text" id="search-bar" placeholder="Search by name...">
-            <select id="filter-category">
-                <option value="all">All Categories</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
-            </select>
-            <select id="sort-by">
-                <option value="date-desc">Date (Newest)</option>
-                <option value="date-asc">Date (Oldest)</option>
-                <option value="amount-desc">Amount (High-Low)</option>
-                <option value="amount-asc">Amount (Low-High)</option>
-            </select>
-            <button onclick="applyFilters()">Apply</button>
-        </div>
-
-        <ul id="expense-list"></ul>
-        <h3>Total: ₹<span id="total-amount">0</span></h3>
+    <div class="dark-box">
+        <label class="switch">
+            <input type="checkbox" id="darkToggle">
+            <span class="slider"></span>
+        </label>
     </div>
+</header>
 
-    <template id="edit-template">
-        <li class="editing">
-            <input type="text" class="edit-name">
-            <input type="number" class="edit-amount">
-            <input type="date" class="edit-date">
-            <select class="edit-category">
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
-            </select>
-            <button class="save-btn">Save</button>
-            <button class="cancel-btn">Cancel</button>
-        </li>
-    </template>
-    <div class="chat-toggle" onclick="toggleChat()">💬</div>
+<div class="container">
+    <div class="card">
 
-<div class="chat-container" id="chatContainer">
-  <div class="chat-header">
-    Smart Expense Assistant
-    <span onclick="toggleChat()" style="cursor:pointer;">✖</span>
-  </div>
+        <h2>Add Expense</h2>
+        <input type="text" id="name" placeholder="Expense Name">
+        <input type="number" id="amount" placeholder="Amount">
+        <input type="date" id="date">
 
-  <div class="chat-body" id="chatBody"></div>
+        <select id="category">
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+        </select>
 
-  <div class="chat-input">
-    <input type="text" id="userInput" placeholder="Ask about your spending..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
+        <button onclick="addExpense()">Add</button>
+
+        <h3>Monthly Budget</h3>
+        <input type="number" id="monthlyBudget" placeholder="Set Monthly Budget">
+        <button onclick="setBudget()">Set Budget</button>
+
+        <h2>Filter & Sort</h2>
+
+        <input type="text" id="search" placeholder="Search by name">
+
+        <select id="monthFilter"></select>
+
+        <select id="categoryFilter">
+            <option value="All">All Categories</option>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <select id="sortOption">
+            <option value="dateDesc">Date (Newest)</option>
+            <option value="dateAsc">Date (Oldest)</option>
+            <option value="category">Category</option>
+        </select>
+
+        <button onclick="applyFilters()">Apply</button>
+
+        <div class="total">
+            Selected Month Total: ₹<span id="totalAmount">0</span>
+        </div>
+
+        <div class="warning" id="budgetWarning"></div>
+
+       <table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="expenseList"></tbody>
+</table>
+
+        <!-- NEW: Monthly Summary Section -->
+        <h2>Monthly Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Month (YYYY-MM)</th>
+                    <th>Total Expense</th>
+                </tr>
+            </thead>
+            <tbody id="monthlySummary"></tbody>
+        </table>
+
+    </div>
 </div>
 
-    <footer class="footer">
-        <p>© 2025 Expense Tracker | Built with ❤️</p>
-    </footer>
-    
-    <script src="script.js"></script>
+<footer>
+    © 2025 Expense Tracker|Built with ❤️
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
