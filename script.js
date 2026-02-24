@@ -1,4 +1,3 @@
-
 let expenses = [];
 let total = 0;
 let budget = 0;
@@ -62,9 +61,13 @@ function updateUI() {
 
   expenses.forEach((expense, index) => {
     const li = document.createElement("li");
-    li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
-                        <button class="edit-btn" onclick="editExpense(${index})">✏️</button>
-                        <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
+    li.innerHTML = `
+            <span>${expense.name}: ₹${expense.amount.toFixed(2)}</span>
+            <div>
+                <button class="edit-btn" onclick="editExpense(${index})">✏️</button>
+                <button class="delete-btn" onclick="removeExpense(${index})">X</button>
+            </div>
+        `;
     expenseList.appendChild(li);
   });
 
@@ -84,37 +87,50 @@ function removeExpense(index) {
 }
 
 function editExpense(index) {
-    const expenseToEdit = expenses[index];
+    const expenseList = document.getElementById('expense-list');
+    const li = expenseList.children[index];
+    const expense = expenses[index];
 
-    const newName = prompt("Enter the new name:", expenseToEdit.name);
-    if (newName === null) {
-        return; 
-    }
-    if (newName.trim() === "") {
-        alert("Name cannot be empty. Edit canceled.");
-        return;
-    }
+    // Switch to editing UI
+    li.classList.add('editing');
+    const template = document.getElementById('edit-template');
+    li.innerHTML = template.content.firstElementChild.innerHTML;
 
-    const newAmountStr = prompt("Enter the new amount:", expenseToEdit.amount);
-    if (newAmountStr === null) {
-        return; 
-    }
-    
-    const newAmount = parseFloat(newAmountStr);
+    // Populate fields and set listeners
+    const nameInput = li.querySelector('.edit-name');
+    const amountInput = li.querySelector('.edit-amount');
+    nameInput.value = expense.name;
+    amountInput.value = expense.amount;
 
-    if (isNaN(newAmount) || newAmount <= 0) {
-        alert("Please enter a valid positive amount. Edit canceled.");
-        return;
-    }
-
-    total = total - expenseToEdit.amount + newAmount;
-    
-    expenses[index] = { name: newName.trim(), amount: newAmount };
-
-    updateUI();
-    saveExpenses();
+    li.querySelector('.save-btn').onclick = () => saveExpense(index);
+    li.querySelector('.cancel-btn').onclick = () => updateUI();
 }
 
+
+function saveExpense(index) {
+  const expenseList = document.getElementById("expense-list");
+  const li = expenseList.children[index];
+  const nameInput = li.querySelector(".edit-name");
+  const amountInput = li.querySelector(".edit-amount");
+
+  const newName = nameInput.value.trim();
+  const newAmount = parseFloat(amountInput.value);
+
+  if (newName === "" || isNaN(newAmount) || newAmount <= 0) {
+    alert("Please enter a valid name and positive amount.");
+    return;
+  }
+
+  total = total - expenses[index].amount + newAmount;
+  expenses[index] = { name: newName, amount: newAmount };
+
+  updateUI();
+  saveExpenses();
+}
+
+function cancelEdit() {
+  updateUI();
+}
 
 function saveExpenses() {
   localStorage.setItem("expenses", JSON.stringify(expenses));
