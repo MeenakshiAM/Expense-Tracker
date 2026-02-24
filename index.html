@@ -7,23 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" sizes="64x64" href="/images/MoneyIcon.png">
 </head>
-<!-- ===== Smart Expense Assistant ===== -->
 
-<div class="chat-toggle" onclick="toggleChat()">💬</div>
-
-<div class="chat-container" id="chatContainer">
-  <div class="chat-header">
-    Smart Expense Assistant
-    <span onclick="toggleChat()" style="cursor:pointer;">✖</span>
-  </div>
-
-  <div class="chat-body" id="chatBody"></div>
-
-  <div class="chat-input">
-    <input type="text" id="userInput" placeholder="Ask about your spending..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
-</div>
 <body>
     <header class="navbar">
         <h1>Expense Tracker</h1>
@@ -91,6 +75,21 @@
             <button class="cancel-btn">Cancel</button>
         </li>
     </template>
+    <div class="chat-toggle" onclick="toggleChat()">💬</div>
+
+<div class="chat-container" id="chatContainer">
+  <div class="chat-header">
+    Smart Expense Assistant
+    <span onclick="toggleChat()" style="cursor:pointer;">✖</span>
+  </div>
+
+  <div class="chat-body" id="chatBody"></div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Ask about your spending..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
 
     <footer class="footer">
         <p>© 2025 Expense Tracker | Built with ❤️</p>
