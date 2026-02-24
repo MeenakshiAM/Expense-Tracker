@@ -58,9 +58,20 @@ function addExpense() {
   }
 }
 
-function updateUI(filteredExpenses) {
-  const expenseList = document.getElementById("expense-list");
-  const totalAmount = document.getElementById("total-amount");
+// --- Update UI ---
+function updateUI() {
+    const expenseList = document.getElementById("expense-list");
+    const totalAmount = document.getElementById("total-amount");
+    
+    expenseList.innerHTML = "";
+
+    expenses.forEach((expense, index) => {
+        const li = document.createElement("li");
+        li.classList.add("fade-in"); // 👈 animation added
+        li.innerHTML = `${expense.name}: ₹${expense.amount.toFixed(2)} 
+                        <button class="delete-btn" onclick="removeExpense(${index})">X</button>`;
+        expenseList.appendChild(li);
+    });
 
   expenseList.innerHTML = "";
 
@@ -99,26 +110,17 @@ function editExpense(index) {
     const li = Array.from(expenseList.children).find(child => child.querySelector(`.edit-btn[onclick="editExpense(${index})"]`));
     if(!li) return;
 
-    const expense = expenses[index];
+    const expenseList = document.getElementById("expense-list");
+    const item = expenseList.children[index];
 
-    // Switch to editing UI
-    li.classList.add('editing');
-    const template = document.getElementById('edit-template');
-    li.innerHTML = template.content.firstElementChild.innerHTML;
+    item.classList.add("fade-out"); // 👈 add fade-out animation
 
-    // Populate fields and set listeners
-    const nameInput = li.querySelector('.edit-name');
-    const amountInput = li.querySelector('.edit-amount');
-    const dateInput = li.querySelector('.edit-date');
-    const categoryInput = li.querySelector('.edit-category');
-
-    nameInput.value = expense.name;
-    amountInput.value = expense.amount;
-    dateInput.value = expense.date;
-    categoryInput.value = expense.category;
-
-    li.querySelector('.save-btn').onclick = () => saveExpense(index);
-    li.querySelector('.cancel-btn').onclick = () => applyFilters();
+    // Wait for animation before removing
+    setTimeout(() => {
+        total -= expenses[index].amount;
+        expenses.splice(index, 1);
+        updateUI();
+    }, 300); // matches animation duration
 }
 
 function saveExpense(index) {
