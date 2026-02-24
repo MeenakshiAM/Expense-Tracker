@@ -97,3 +97,57 @@ themeToggleBtn.addEventListener("click", () => {
         themeToggleBtn.textContent = "🌙 Dark Mode";
     }
 });
+// ===== Smart Expense Assistant =====
+
+function toggleChat() {
+  const chat = document.getElementById("chatContainer");
+  chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+}
+
+function sendMessage() {
+  const inputField = document.getElementById("userInput");
+  const message = inputField.value.trim();
+  if (!message) return;
+
+  appendMessage("You", message);
+
+  setTimeout(() => {
+    const reply = getBotResponse(message);
+    appendMessage("Assistant", reply);
+  }, 500);
+
+  inputField.value = "";
+}
+
+function appendMessage(sender, message) {
+  const chatBody = document.getElementById("chatBody");
+  const msg = document.createElement("p");
+  msg.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  chatBody.appendChild(msg);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function getBotResponse(input) {
+  input = input.toLowerCase();
+
+  let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+  let total = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+
+  if (input.includes("total") || input.includes("spend")) {
+    return `Your total recorded expense is ₹${total}.`;
+  }
+
+  if (input.includes("save") || input.includes("saving")) {
+    return "Tip: Follow the 50-30-20 budgeting rule to manage your finances effectively.";
+  }
+
+  if (input.includes("budget")) {
+    return "Set a monthly limit and review your expenses weekly.";
+  }
+
+  if (input.includes("help")) {
+    return "You can ask me about total expenses, saving tips, or budgeting advice.";
+  }
+
+  return "I'm here to help you track and improve your spending habits.";
+}

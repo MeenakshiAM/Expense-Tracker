@@ -167,29 +167,74 @@ body.dark-mode .delete-btn:hover {
         padding: 6px;
     }
 }
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* ===== Smart Expense Assistant ===== */
+
+.chat-toggle {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: #1e88e5;
+  color: white;
+  font-size: 22px;
+  padding: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
 }
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
+
+.chat-container {
+  position: fixed;
+  bottom: 130px;
+  right: 20px;
+  width: 320px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 999;
 }
-.fade-in {
-    animation: fadeIn 0.3s ease forwards;
+
+.chat-header {
+  background: #1e88e5;
+  color: white;
+  padding: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.fade-out {
-    animation: fadeOut 0.3s ease forwards;
+
+.chat-body {
+  padding: 15px;
+  height: 300px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.chat-body p {
+  margin: 8px 0;
+}
+
+.chat-input {
+  display: flex;
+  border-top: 1px solid #eee;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
+
+.chat-input button {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
 }
