@@ -3,20 +3,29 @@ let monthlyBudget = localStorage.getItem("monthlyBudget") || 0;
 let editIndex = -1;
 let expenseChart;
 
-const toggle = document.getElementById("darkToggle");
+const darkToggle = document.getElementById("darkToggle");
 
+// Set initial icon based on saved mode
 if (localStorage.getItem("darkMode") === "enabled") {
     document.body.classList.add("dark");
-    toggle.checked = true;
+    darkToggle.querySelector('.icon').textContent = '☀️';
+} else {
+    darkToggle.querySelector('.icon').textContent = '🌙';
 }
 
-toggle.addEventListener("change", function () {
+darkToggle.addEventListener("click", function () {
     document.body.classList.toggle("dark");
-    localStorage.setItem("darkMode",
-        document.body.classList.contains("dark") ? "enabled" : "disabled"
-    );
+    const icon = darkToggle.querySelector('.icon');
+    
+    // Update button icon based on mode
+    if (document.body.classList.contains("dark")) {
+        icon.textContent = '☀️';  // Sun for dark mode (to switch to light)
+        localStorage.setItem("darkMode", "enabled");
+    } else {
+        icon.textContent = '🌙';  // Moon for light mode (to switch to dark)
+        localStorage.setItem("darkMode", "disabled");
+    }
 });
-
 function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
     localStorage.setItem("monthlyBudget", monthlyBudget);

@@ -23,8 +23,35 @@ header {
 
 .dark-box {
     background: white;
-    padding: 5px 12px;
-    border-radius: 20px;
+    padding: 5px 15px;
+    border-radius: 30px;
+}
+
+.dark-mode-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px 10px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode-btn .icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.dark-mode-btn:hover .icon {
+    transform: scale(1.1);
+}
+
+/* Dark mode styles for the button */
+.dark .dark-box {
+    background: #333;
+}
+
+.dark .dark-mode-btn {
+    color: #ffd700;
 }
 
 .switch {
