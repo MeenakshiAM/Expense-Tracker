@@ -54,11 +54,25 @@ function editExpense(index) {
 }
 
 function deleteExpense(index) {
-    if (confirm("Delete this expense?")) {
+    const modal = document.getElementById("confirmModal");
+    const message = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    message.textContent = "Delete this expense?";
+    modal.style.display = "flex";
+
+    yesBtn.onclick = function () {
         expenses.splice(index, 1);
         saveData();
         renderExpenses();
-    }
+        modal.style.display = "none";
+        showNotification("Expense deleted");
+    };
+
+    noBtn.onclick = function () {
+        modal.style.display = "none";
+    };
 }
 
 function setBudget() {
