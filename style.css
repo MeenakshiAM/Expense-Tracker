@@ -149,3 +149,47 @@ footer {
     width: 100% !important;
     height: 100% !important;
 }
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: #2e7d32;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 6px;
+    display: none;
+    z-index: 1000;
+}
+
+.notification.error {
+    background: #d32f2f;
+}
+
+.notification.show {
+    display: block;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.dark .modal-content {
+    background: #1e1e1e;
+    color: white;
+}
