@@ -29,8 +29,8 @@ function addExpense() {
     const category = document.getElementById("category").value;
 
     if (!name || !amount || !date) {
-        alert("Fill all fields");
-        return;
+    showNotification("Please fill all fields", "error");   
+    return;
     }
 
     if (editIndex === -1) {
