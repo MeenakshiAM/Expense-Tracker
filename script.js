@@ -1,8 +1,12 @@
-let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-let monthlyBudget = localStorage.getItem("monthlyBudget") || 0;
+let expenses = [];
+let monthlyBudget = 0;
 let editIndex = -1;
 let expenseChart;
-
+async function fetchExpenses() {
+    const res = await fetch("http://localhost:5000/expenses");
+    expenses = await res.json();
+    renderExpenses();
+}
 const toggle = document.getElementById("darkToggle");
 
 if (localStorage.getItem("darkMode") === "enabled") {
@@ -22,26 +26,23 @@ function saveData() {
     localStorage.setItem("monthlyBudget", monthlyBudget);
 }
 
-function addExpense() {
+async function addExpense() {
     const name = document.getElementById("name").value;
     const amount = parseFloat(document.getElementById("amount").value);
     const date = document.getElementById("date").value;
     const category = document.getElementById("category").value;
 
-    if (!name || !amount || !date) {
-        alert("Fill all fields");
-        return;
-    }
+    const expense = { name, amount, date, category };
 
-    if (editIndex === -1) {
-        expenses.push({ name, amount, date, category });
-    } else {
-        expenses[editIndex] = { name, amount, date, category };
-        editIndex = -1;
-    }
+    await fetch("http://localhost:5000/expenses", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(expense)
+    });
 
-    saveData();
-    renderExpenses();
+    fetchExpenses();  // 🔥 reload from backend
 }
 
 function editExpense(index) {
@@ -53,12 +54,12 @@ function editExpense(index) {
     editIndex = index;
 }
 
-function deleteExpense(index) {
-    if (confirm("Delete this expense?")) {
-        expenses.splice(index, 1);
-        saveData();
-        renderExpenses();
-    }
+async function deleteExpense(id) {
+    await fetch(`http://localhost:5000/expenses/${id}`, {
+        method: "DELETE"
+    });
+
+    fetchExpenses();
 }
 
 function setBudget() {
@@ -110,7 +111,7 @@ function renderExpenses() {
                 <td>${exp.category}</td>
                 <td>
                     <button onclick="editExpense(${index})">Edit</button>
-                    <button onclick="deleteExpense(${index})">Delete</button>
+                    <button onclick="deleteExpense('${exp._id}')">Delete</button>
                 </td>
             </tr>
         `;
@@ -207,4 +208,4 @@ function generatePieChart(selectedMonth) {
     });
 }
 
-renderExpenses();
+fetchExpenses();
