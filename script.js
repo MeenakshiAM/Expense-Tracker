@@ -160,6 +160,19 @@ function generateMonthlySummary() {
         `;
     }
 }
+function showNotification(message, type = "success") {
+    const notification = document.getElementById("notification");
+    notification.textContent = message;
+    notification.className = "notification show";
+
+    if (type === "error") {
+        notification.classList.add("error");
+    }
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+    }, 3000);
+}
 
 function generatePieChart(selectedMonth) {
     if (expenseChart) expenseChart.destroy();
