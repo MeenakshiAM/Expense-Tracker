@@ -38,8 +38,8 @@ function addExpense() {
     const category = document.getElementById("category").value;
 
     if (!name || !amount || !date) {
-        alert("Fill all fields");
-        return;
+    showNotification("Please fill all fields", "error");   
+    return;
     }
 
     if (editIndex === -1) {
@@ -63,11 +63,25 @@ function editExpense(index) {
 }
 
 function deleteExpense(index) {
-    if (confirm("Delete this expense?")) {
+    const modal = document.getElementById("confirmModal");
+    const message = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    message.textContent = "Delete this expense?";
+    modal.style.display = "flex";
+
+    yesBtn.onclick = function () {
         expenses.splice(index, 1);
         saveData();
         renderExpenses();
-    }
+        modal.style.display = "none";
+        showNotification("Expense deleted");
+    };
+
+    noBtn.onclick = function () {
+        modal.style.display = "none";
+    };
 }
 
 function setBudget() {
@@ -168,6 +182,19 @@ function generateMonthlySummary() {
             </tr>
         `;
     }
+}
+function showNotification(message, type = "success") {
+    const notification = document.getElementById("notification");
+    notification.textContent = message;
+    notification.className = "notification show";
+
+    if (type === "error") {
+        notification.classList.add("error");
+    }
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+    }, 3000);
 }
 
 function generatePieChart(selectedMonth) {
