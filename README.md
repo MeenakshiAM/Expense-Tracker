@@ -27,6 +27,25 @@ This project allows users to:
 
 💡 Input validation for incorrect entries
 
+
+Screenshots
+-------------
+
+Dark Theme:
+
+![alt text](<Screenshot 2026-02-26 232318.png>)
+
+Light theme:
+
+![alt text](<Screenshot 2026-02-26 232840.png>)
+
+Expense Added:
+
+![alt text](<Screenshot 2026-02-26 232840-1.png>)
+
+Monthly Budget Exceeded:
+
+![alt text](<Screenshot 2026-02-26 233520.png>)
 🚀 Getting Started
 -------------------
 
