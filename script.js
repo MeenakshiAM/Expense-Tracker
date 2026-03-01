@@ -1,19 +1,30 @@
-let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-let monthlyBudget = localStorage.getItem("monthlyBudget") || 0;
-let editIndex = -1;
+let expenses = [];
+let monthlyBudget = localStorage.getItem("monthlyBudget") ? parseFloat(localStorage.getItem("monthlyBudget")) : 0;
+let editId = null;  // track the _id of the expense being edited
 let expenseChart;
 
-const darkToggle = document.getElementById("darkToggle");
-
-// Set initial icon based on saved mode
-if (localStorage.getItem("darkMode") === "enabled") {
-    document.body.classList.add("dark");
-    darkToggle.querySelector('.icon').textContent = '☀️';
-} else {
-    darkToggle.querySelector('.icon').textContent = '🌙';
+async function fetchExpenses() {
+    try {
+        const res = await fetch("http://localhost:5000/expenses");
+        if (!res.ok) throw new Error("Server error");
+        expenses = await res.json();
+    } catch (error) {
+        console.error("Could not fetch expenses:", error);
+        alert("⚠ Could not connect to the server. Make sure the backend is running (node server.js).");
+        return;
+    }
+    document.getElementById("monthlyBudget").value = monthlyBudget > 0 ? monthlyBudget : "";
+    renderExpenses();
 }
 
-darkToggle.addEventListener("click", function () {
+const toggle = document.getElementById("darkToggle");
+
+if (localStorage.getItem("darkMode") === "enabled") {
+    document.body.classList.add("dark");
+    toggle.checked = true;
+}
+
+toggle.addEventListener("change", function () {
     document.body.classList.toggle("dark");
     const icon = darkToggle.querySelector('.icon');
 
@@ -26,31 +37,70 @@ darkToggle.addEventListener("click", function () {
         localStorage.setItem("darkMode", "disabled");
     }
 });
+
 function saveData() {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
     localStorage.setItem("monthlyBudget", monthlyBudget);
 }
 
-function addExpense() {
-    const name = document.getElementById("name").value;
+function clearForm() {
+    document.getElementById("name").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("category").value = "Food";
+    editId = null;
+    // Reset button text back to "Add"
+    const addBtn = document.querySelector("button[onclick='addExpense()']");
+    if (addBtn) addBtn.textContent = "Add";
+}
+
+async function addExpense() {
+    const name = document.getElementById("name").value.trim();
     const amount = parseFloat(document.getElementById("amount").value);
     const date = document.getElementById("date").value;
     const category = document.getElementById("category").value;
 
-    if (!name || !amount || !date) {
-        showNotification("Please fill all fields", "error");
+    // --- Input validation ---
+    if (!name) {
+        alert("Please enter an expense name.");
+        return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount greater than 0.");
+        return;
+    }
+    if (!date) {
+        alert("Please select a date.");
         return;
     }
 
-    if (editIndex === -1) {
-        expenses.push({ name, amount, date, category });
-    } else {
-        expenses[editIndex] = { name, amount, date, category };
-        editIndex = -1;
+    const expense = { name, amount, date, category };
+
+    try {
+        if (editId) {
+            // UPDATE existing expense
+            const res = await fetch(`http://localhost:5000/expenses/${editId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(expense)
+            });
+            if (!res.ok) throw new Error("Update failed");
+        } else {
+            // CREATE new expense
+            const res = await fetch("http://localhost:5000/expenses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(expense)
+            });
+            if (!res.ok) throw new Error("Save failed");
+        }
+    } catch (error) {
+        console.error("Error saving expense:", error);
+        alert("⚠ Failed to save expense. Is the backend running?");
+        return;
     }
 
-    saveData();
-    renderExpenses();
+    clearForm();
+    fetchExpenses();
 }
 
 function editExpense(index) {
@@ -59,33 +109,29 @@ function editExpense(index) {
     document.getElementById("amount").value = exp.amount;
     document.getElementById("date").value = exp.date;
     document.getElementById("category").value = exp.category;
-    editIndex = index;
+    editId = exp._id;
+    // Change button text to indicate editing
+    const addBtn = document.querySelector("button[onclick='addExpense()']");
+    if (addBtn) addBtn.textContent = "Update";
 }
 
-function deleteExpense(index) {
-    const modal = document.getElementById("confirmModal");
-    const message = document.getElementById("confirmMessage");
-    const yesBtn = document.getElementById("confirmYes");
-    const noBtn = document.getElementById("confirmNo");
-
-    message.textContent = "Delete this expense?";
-    modal.style.display = "flex";
-
-    yesBtn.onclick = function () {
-        expenses.splice(index, 1);
-        saveData();
-        renderExpenses();
-        modal.style.display = "none";
-        showNotification("Expense deleted");
-    };
-
-    noBtn.onclick = function () {
-        modal.style.display = "none";
-    };
+async function deleteExpense(id) {
+    if (!confirm("Are you sure you want to delete this expense?")) return;
+    try {
+        const res = await fetch(`http://localhost:5000/expenses/${id}`, {
+            method: "DELETE"
+        });
+        if (!res.ok) throw new Error("Delete failed");
+    } catch (error) {
+        console.error("Error deleting expense:", error);
+        alert("⚠ Failed to delete expense.");
+        return;
+    }
+    fetchExpenses();
 }
 
 function setBudget() {
-    monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
+    monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value) || 0;
     saveData();
     renderExpenses();
 }
@@ -109,7 +155,7 @@ function renderExpenses() {
         filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
 
     if (month !== "All")
-        filtered = filtered.filter(e => e.date.startsWith(month));
+        filtered = filtered.filter(e => e.date && e.date.startsWith(month));
 
     if (category !== "All")
         filtered = filtered.filter(e => e.category === category);
@@ -133,7 +179,7 @@ function renderExpenses() {
                 <td>${exp.category}</td>
                 <td>
                     <button onclick="editExpense(${index})">Edit</button>
-                    <button onclick="deleteExpense(${index})">Delete</button>
+                    <button onclick="deleteExpense('${exp._id}')">Delete</button>
                 </td>
             </tr>
         `;
@@ -144,6 +190,11 @@ function renderExpenses() {
     if (monthlyBudget && total > monthlyBudget) {
         document.getElementById("budgetWarning").textContent =
             "⚠ Monthly Budget Exceeded!";
+        document.getElementById("budgetWarning").style.color = "red";
+    } else if (monthlyBudget && total >= monthlyBudget * 0.8) {
+        document.getElementById("budgetWarning").textContent =
+            "⚠ Approaching Monthly Budget (>= 80%)!";
+        document.getElementById("budgetWarning").style.color = "orange";
     } else {
         document.getElementById("budgetWarning").textContent = "";
     }
@@ -155,7 +206,7 @@ function renderExpenses() {
 
 function populateMonths() {
     const select = document.getElementById("monthFilter");
-    const months = [...new Set(expenses.map(e => e.date.slice(0, 7)))];
+    const months = [...new Set(expenses.filter(e => e.date).map(e => e.date.slice(0, 7)))];
 
     select.innerHTML = `<option value="All">All Months</option>`;
     months.forEach(m => {
@@ -170,6 +221,7 @@ function generateMonthlySummary() {
     const monthlyTotals = {};
 
     expenses.forEach(exp => {
+        if (!exp.date) return;
         const month = exp.date.slice(0, 7);
         monthlyTotals[month] = (monthlyTotals[month] || 0) + exp.amount;
     });
@@ -183,25 +235,12 @@ function generateMonthlySummary() {
         `;
     }
 }
-function showNotification(message, type = "success") {
-    const notification = document.getElementById("notification");
-    notification.textContent = message;
-    notification.className = "notification show";
-
-    if (type === "error") {
-        notification.classList.add("error");
-    }
-
-    setTimeout(() => {
-        notification.classList.remove("show");
-    }, 3000);
-}
 
 function generatePieChart(selectedMonth) {
     if (expenseChart) expenseChart.destroy();
 
     let monthExpenses = selectedMonth && selectedMonth !== "All"
-        ? expenses.filter(e => e.date.startsWith(selectedMonth))
+        ? expenses.filter(e => e.date && e.date.startsWith(selectedMonth))
         : expenses;
 
     const categoryTotals = {};
@@ -373,4 +412,4 @@ function exportToPDF() {
     doc.save(filename);
 }
 
-renderExpenses();
+fetchExpenses();
