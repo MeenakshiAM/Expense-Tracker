@@ -16,7 +16,7 @@ if (localStorage.getItem("darkMode") === "enabled") {
 darkToggle.addEventListener("click", function () {
     document.body.classList.toggle("dark");
     const icon = darkToggle.querySelector('.icon');
-    
+
     // Update button icon based on mode
     if (document.body.classList.contains("dark")) {
         icon.textContent = '☀️';  // Sun for dark mode (to switch to light)
@@ -26,6 +26,51 @@ darkToggle.addEventListener("click", function () {
         localStorage.setItem("darkMode", "disabled");
     }
 });
+
+// ─── Enter-key navigation for form inputs (Feature #13) ───────────────────
+function setupEnterKeyNavigation() {
+    // Helper: focus the next element when Enter is pressed
+    function onEnterFocus(currentId, nextId) {
+        document.getElementById(currentId).addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById(nextId).focus();
+            }
+        });
+    }
+
+    // Expense form: Name → Amount → Date → Category → submit
+    onEnterFocus("name", "amount");
+    onEnterFocus("amount", "date");
+    onEnterFocus("date", "category");
+
+    // Enter on Category select triggers addExpense()
+    document.getElementById("category").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addExpense();
+        }
+    });
+
+    // Budget field: Enter triggers setBudget()
+    document.getElementById("monthlyBudget").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            setBudget();
+        }
+    });
+
+    // Search field: Enter applies filters
+    document.getElementById("search").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applyFilters();
+        }
+    });
+}
+setupEnterKeyNavigation();
+// ──────────────────────────────────────────────────────────────────────────
+
 function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
     localStorage.setItem("monthlyBudget", monthlyBudget);
@@ -38,8 +83,8 @@ function addExpense() {
     const category = document.getElementById("category").value;
 
     if (!name || !amount || !date) {
-    showNotification("Please fill all fields", "error");   
-    return;
+        showNotification("Please fill all fields", "error");
+        return;
     }
 
     if (editIndex === -1) {
@@ -225,21 +270,21 @@ function generatePieChart(selectedMonth) {
             }]
         },
         options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-        tooltip: {
-            callbacks: {
-                label: function(context) {
-                    let total = data.reduce((a, b) => a + b, 0);
-                    let value = context.raw;
-                    let percentage = ((value / total) * 100).toFixed(1);
-                    return `${context.label}: ₹${value} (${percentage}%)`;
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let total = data.reduce((a, b) => a + b, 0);
+                            let value = context.raw;
+                            let percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ₹${value} (${percentage}%)`;
+                        }
+                    }
                 }
             }
         }
-    }
-}
     });
 }
 
