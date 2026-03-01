@@ -26,9 +26,16 @@ if (localStorage.getItem("darkMode") === "enabled") {
 
 toggle.addEventListener("change", function () {
     document.body.classList.toggle("dark");
-    localStorage.setItem("darkMode",
-        document.body.classList.contains("dark") ? "enabled" : "disabled"
-    );
+    const icon = darkToggle.querySelector('.icon');
+
+    // Update button icon based on mode
+    if (document.body.classList.contains("dark")) {
+        icon.textContent = '☀️';  // Sun for dark mode (to switch to light)
+        localStorage.setItem("darkMode", "enabled");
+    } else {
+        icon.textContent = '🌙';  // Moon for light mode (to switch to dark)
+        localStorage.setItem("darkMode", "disabled");
+    }
 });
 
 function saveData() {
@@ -273,6 +280,136 @@ function generatePieChart(selectedMonth) {
             }
         }
     });
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Get current filter state
+    const month = document.getElementById("monthFilter").value;
+    const category = document.getElementById("categoryFilter").value;
+    const total = document.getElementById("totalAmount").textContent;
+
+    // Filter expenses same as renderExpenses
+    let filtered = [...expenses];
+    const search = document.getElementById("search").value.toLowerCase();
+
+    if (search)
+        filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
+    if (month !== "All")
+        filtered = filtered.filter(e => e.date && e.date.startsWith(month));
+    if (category !== "All")
+        filtered = filtered.filter(e => e.category === category);
+
+    const sort = document.getElementById("sortOption").value;
+    if (sort === "dateAsc")
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    else if (sort === "dateDesc")
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    else if (sort === "category")
+        filtered.sort((a, b) => a.category.localeCompare(b.category));
+
+    // --- Title ---
+    doc.setFontSize(20);
+    doc.setTextColor(46, 125, 50);
+    doc.text("Expense Tracker Report", 14, 20);
+
+    // --- Report info ---
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    const reportDate = new Date().toLocaleDateString("en-IN", {
+        year: "numeric", month: "long", day: "numeric"
+    });
+    doc.text("Generated: " + reportDate, 14, 28);
+    const filterLabel = month !== "All" ? "Month: " + month : "All Months";
+    const catLabel = category !== "All" ? " | Category: " + category : "";
+    doc.text("Filters: " + filterLabel + catLabel, 14, 34);
+
+    // --- Total ---
+    doc.setFontSize(13);
+    doc.setTextColor(0);
+    doc.text("Total: \u20b9" + total, 14, 44);
+
+    // --- Budget status ---
+    if (monthlyBudget > 0) {
+        const totalNum = parseFloat(total);
+        doc.setFontSize(10);
+        if (totalNum > monthlyBudget) {
+            doc.setTextColor(211, 47, 47);
+            doc.text("Budget: \u20b9" + monthlyBudget + " \u2014 EXCEEDED", 14, 50);
+        } else if (totalNum >= monthlyBudget * 0.8) {
+            doc.setTextColor(245, 124, 0);
+            doc.text("Budget: \u20b9" + monthlyBudget + " \u2014 Approaching limit (>= 80%)", 14, 50);
+        } else {
+            doc.setTextColor(46, 125, 50);
+            doc.text("Budget: \u20b9" + monthlyBudget + " \u2014 Within limit", 14, 50);
+        }
+    }
+
+    // --- Expense table ---
+    if (filtered.length === 0) {
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text("No expenses to display for the selected filters.", 14, 62);
+    } else {
+        const tableData = filtered.map(function (exp) {
+            return [exp.name, "\u20b9" + exp.amount, exp.date || "N/A", exp.category];
+        });
+
+        doc.autoTable({
+            startY: monthlyBudget > 0 ? 56 : 50,
+            head: [["Name", "Amount", "Date", "Category"]],
+            body: tableData,
+            theme: "striped",
+            headStyles: { fillColor: [46, 125, 50] },
+            styles: { fontSize: 9 }
+        });
+    }
+
+    // --- Category summary ---
+    const categoryTotals = {};
+    filtered.forEach(function (exp) {
+        categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+    });
+
+    if (Object.keys(categoryTotals).length > 0) {
+        const catData = Object.entries(categoryTotals).map(function (entry) {
+            return [entry[0], "\u20b9" + entry[1]];
+        });
+        const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 70;
+
+        doc.setFontSize(13);
+        doc.setTextColor(0);
+        doc.text("Category Summary", 14, startY);
+
+        doc.autoTable({
+            startY: startY + 4,
+            head: [["Category", "Total"]],
+            body: catData,
+            theme: "grid",
+            headStyles: { fillColor: [21, 101, 192] },
+            styles: { fontSize: 9 }
+        });
+    }
+
+    // --- Footer on every page ---
+    const pageCount = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(
+            "Expense Tracker \u2014 Page " + i + " of " + pageCount,
+            doc.internal.pageSize.getWidth() / 2,
+            doc.internal.pageSize.getHeight() - 10,
+            { align: "center" }
+        );
+    }
+
+    // --- Save ---
+    const filename = month !== "All" ? "expenses_" + month + ".pdf" : "expenses_report.pdf";
+    doc.save(filename);
 }
 
 fetchExpenses();
