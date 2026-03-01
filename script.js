@@ -38,6 +38,50 @@ toggle.addEventListener("change", function () {
     }
 });
 
+// ─── Enter-key navigation for form inputs (Feature #13) ───────────────────
+function setupEnterKeyNavigation() {
+    // Helper: focus the next element when Enter is pressed
+    function onEnterFocus(currentId, nextId) {
+        document.getElementById(currentId).addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById(nextId).focus();
+            }
+        });
+    }
+
+    // Expense form: Name → Amount → Date → Category → submit
+    onEnterFocus("name", "amount");
+    onEnterFocus("amount", "date");
+    onEnterFocus("date", "category");
+
+    // Enter on Category select triggers addExpense()
+    document.getElementById("category").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            addExpense();
+        }
+    });
+
+    // Budget field: Enter triggers setBudget()
+    document.getElementById("monthlyBudget").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            setBudget();
+        }
+    });
+
+    // Search field: Enter applies filters
+    document.getElementById("search").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applyFilters();
+        }
+    });
+}
+setupEnterKeyNavigation();
+// ──────────────────────────────────────────────────────────────────────────
+
 function saveData() {
     localStorage.setItem("monthlyBudget", monthlyBudget);
 }
