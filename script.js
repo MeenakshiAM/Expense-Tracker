@@ -456,4 +456,67 @@ function exportToPDF() {
     doc.save(filename);
 }
 
+function exportToExcel() {
+    // Get current filter state
+    const month = document.getElementById("monthFilter").value;
+    const category = document.getElementById("categoryFilter").value;
+    const total = document.getElementById("totalAmount").textContent;
+
+    // Filter expenses same as renderExpenses
+    let filtered = [...expenses];
+    const search = document.getElementById("search").value.toLowerCase();
+
+    if (search)
+        filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
+    if (month !== "All")
+        filtered = filtered.filter(e => e.date && e.date.startsWith(month));
+    if (category !== "All")
+        filtered = filtered.filter(e => e.category === category);
+
+    const sort = document.getElementById("sortOption").value;
+    if (sort === "dateAsc")
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    else if (sort === "dateDesc")
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    else if (sort === "category")
+        filtered.sort((a, b) => a.category.localeCompare(b.category));
+
+    // Prepare data for Excel
+    const excelData = filtered.map(exp => ({
+        "Date": exp.date || "N/A",
+        "Category": exp.category,
+        "Description": exp.name,
+        "Amount (₹)": exp.amount
+    }));
+
+    // Add total row if there's data
+    if (excelData.length > 0) {
+        excelData.push({}); // Empty row
+        excelData.push({
+            "Date": "TOTAL",
+            "Amount (₹)": parseFloat(total)
+        });
+    }
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    const wscols = [
+        { wch: 15 }, // Date
+        { wch: 15 }, // Category
+        { wch: 30 }, // Description
+        { wch: 15 }  // Amount
+    ];
+    worksheet['!cols'] = wscols;
+
+    // Create workbook and append worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+
+    // Save file
+    const filename = month !== "All" ? `expenses_${month}.xlsx` : "expenses_report.xlsx";
+    XLSX.writeFile(workbook, filename);
+}
+
 fetchExpenses();
