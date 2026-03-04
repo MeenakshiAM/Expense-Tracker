@@ -245,3 +245,20 @@ footer {
 .dark .export-btn:hover {
     background: #1565c0;
 }
+
+.excel-btn {
+    background: #2e7d32;
+    margin-left: 10px;
+}
+
+.excel-btn:hover {
+    background: #1b5e20;
+}
+
+.dark .excel-btn {
+    background: #43a047;
+}
+
+.dark .excel-btn:hover {
+    background: #2e7d32;
+}
